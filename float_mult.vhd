@@ -77,7 +77,7 @@ begin
     --Operaciones para el signo
     sr <= '0' when (ep < to_integer(emin)) or (mx = 0 and ex = 0) or (my = 0 and ey = 0) else sx xor sy;
     --Resultado exponente
-    er_int <= 62 when ep > to_integer(emax) 
+    er_int <= to_integer(emax) when ep > to_integer(emax) 
                 else to_integer(ezero) when (ep < to_integer(emin)) or (mx = 0 and ex = 0) or (my = 0 and ey = 0) 
                 else ep;
     er <= to_unsigned(er_int, NE);
