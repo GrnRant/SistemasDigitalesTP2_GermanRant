@@ -41,7 +41,6 @@ architecture float_mult_arch of float_mult is
     signal mzero : unsigned(NF - 1 downto 0);
 
     --Auxiliares
-    signal ov : std_logic := '0'; --Bit de overflow de la mantisa
     constant exc : unsigned(NE - 1 downto 0) := ('0', others => '1'); --Excedente del exponente (bias)
     signal sat : std_logic := '0'; --Señal interna de saturación
 
@@ -64,8 +63,6 @@ begin
 
     --Operaciones parciales para la mantisa
     mp1 <= ('1' & mx) * ('1' & my);
-    --Overflow = al bit más significativo
-    ov <= mp1(2*NF + 1); 
 
     --Resultados parciales
     mp2 <= mp1(2 * NF downto NF + 1) when mp1(2*NF + 1) = '1' 
