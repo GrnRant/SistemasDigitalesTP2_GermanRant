@@ -49,7 +49,7 @@ architecture float_adder_arch of float_adder is
     signal aligna: unsigned(NF + (2**NE-2) + 1 downto 0) := (others => '0'); --Alineación del mayor (solo se concatena '1') 
     signal alignb: unsigned(NF + (2**NE-2) + 1 downto 0) := (others => '0'); --Alineación del menor
     signal sum: unsigned(NF + (2**NE-2) + 1 downto 0) := (others => '0'); --Resultado de la suma/resta (sin signo)
-    signal sum_shifted: unsigned(NF + 1 downto 0) := (others => '0'); --Resultado de la suma/resta shifteada hasta primer '1'
+    signal sum_shifted: unsigned(NF + (2**NE-2) + 1 downto 0) := (others => '0'); --Resultado de la suma/resta shifteada hasta primer '1'
     signal lead: integer := 0; --Cantidad de ceros que hay hasta el primer '1' de suma de mantisas alineadas
 
 begin
@@ -95,16 +95,15 @@ begin
     lead <= get_lead(sum(NF + edif downto 0));
     ep <= to_integer(ea) + 1 when sum(NF + edif + 1) = '1' and (sa = sb) else to_integer(ea) - lead;
 
-    sum_shifted <= sum(NF + edif + 1 downto edif) when sum(NF + edif + 1 downto NF + edif) = "11" 
-                    else sum(NF + edif + 1 downto edif) srl 1 when sum(NF + edif + 1 downto NF + edif) = "10" 
-                    else sum(NF + edif + 1 downto edif) sll lead when (lead < NF);
+    sum_shifted <= sum srl 1 when sum(NF + edif + 1) = '1'
+                    else sum sll lead when (lead < NF);
 
-    mp <= sum_shifted((NF - 1) downto 0); --Mantisa parcial, -1 en el rango para sacar el 1 implícito
+    mp <= sum_shifted(NF + edif - 1 downto edif); --Mantisa parcial, -1 en el rango para sacar el 1 implícito
 
     --Verificación de saturación y obtención de valores resultantes
-    sr <= sp;
-    er <= ezero when (ep < 0) else esat when (ep > to_integer(esat)) else to_unsigned(ep, NE);
-    mr <= mzero when (ep < 0) else msat when (ep > to_integer(esat)) else mp;
+    sr <= '0' when (sa /= sb and ma = mb and edif = 0) else sp;
+    er <= ezero when (ep < 0) or (sa /= sb and ma = mb and edif = 0) else esat when (ep > to_integer(esat)) else to_unsigned(ep, NE);
+    mr <= mzero when (ep < 0) or (sa /= sb and ma = mb and edif = 0) else msat when (ep > to_integer(esat)) else mp;
      
     --Salida final
     res_o <= (std_logic_vector(sr & er & mr));

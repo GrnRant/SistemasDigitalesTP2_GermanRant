@@ -65,7 +65,7 @@ begin
         
         -- Se aborta la simulacion (fin del archivo)
         assert false report
-            "Fin de la simulacion" severity failure;
+            "Fin de la simulacion, errores: " & integer'image(errores) severity failure;
 
     end process Test_Sequence;
 
